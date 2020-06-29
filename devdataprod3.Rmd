@@ -1,0 +1,34 @@
+---
+title: "devdataprod3"
+author: "Allen Lin"
+date: "6/28/2020"
+output: html_document
+---
+
+## Overview
+This is my presentation utilizing Leaflet and RMarkdown.
+
+## Map of 20 largest cities in the United States
+```{r, message = FALSE, echo=FALSE}
+library(dplyr)
+library(leaflet)
+data <- read.table("D:/Datasets/city_pop.txt", sep = "\t", header = FALSE)
+
+locats = scan(text = data$V11, what = "")
+lati = gsub("Â°N","",locats[c(TRUE, FALSE)])
+longi = gsub("Â°W","",locats[c(FALSE, TRUE)])
+
+string_pop <- data$V4
+
+data <- data %>% mutate(lat = as.numeric(lati)) %>% mutate(long=as.numeric(longi) * -1) %>% mutate(name = data$V2) %>% 
+  mutate(pop = as.numeric(gsub(",","",data$V4))) %>% mutate(rank = data$V1) %>% select(rank, name, pop, lat, long)
+
+data%>%
+  leaflet()%>%
+  addTiles()%>%
+  addCircles(weight = 1, radius = sqrt(data$pop) * 100) %>%
+  addMarkers(lng = data$long, lat = data$lat, 
+             popup = paste("Rank:",data$rank,"<br>",
+                           "City:",data$name,"<br>",
+                           "Population:",string_pop,"<br>"))
+```
